@@ -1,0 +1,4 @@
+speechrecognition
+scipy
+dtw-python
+numpy
