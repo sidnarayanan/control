@@ -1,15 +1,20 @@
 import yaml
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict
 
 
 @dataclass(frozen=True)
 class Config:
     config_path: str
+
+    control_wakeword: str = "watson"
     control_indicator_entity: str = None
+
     listen_timeout: int = 10
-    hass_auth_key: str = ""
     keyword_match_threshold: float = 7000.0
+    hass_auth_key: str = ""
+    actions: Dict = field(default_factory=dict)
 
 
 _home_dir = os.path.expanduser("~")
@@ -24,6 +29,12 @@ def get_config() -> Config:
         with open(_cfg_path) as fcfg:
             content = yaml.load(fcfg, Loader=yaml.SafeLoader)
         kwargs.update(content)
+
+    _action_path = _cfg_dir + "/actions.yaml"
+    if os.path.exists(_action_path):
+        with open(_action_path) as fcfg:
+            content = yaml.load(fcfg, Loader=yaml.SafeLoader)
+        kwargs["actions"] = content
 
     cfg = Config(**kwargs)
     return cfg

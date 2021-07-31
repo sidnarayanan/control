@@ -1,0 +1,6 @@
+nevermind:
+    action: noop
+
+kitchen_lights:
+    action: light_toggle
+    entity: light.kitchen_lights 

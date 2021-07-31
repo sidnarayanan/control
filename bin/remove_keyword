@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+
+
+import sys
+from argparse import ArgumentParser
+
+import control as C
+
+
+def main():
+    parser = ArgumentParser("Remove a keyword")
+    parser.add_argument("--keyword", "-k", help="Name of this keyword")
+    args = parser.parse_args()
+
+    kws = C.keywords
+
+    if args.keyword not in kws:
+        print(f'"{args.keyword}" is not known')
+        return 1
+    else:
+        del kws[args.keyword]
+        print(f'Successfully removed "{args.keyword}"')
+        kws.save()
+        return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

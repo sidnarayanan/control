@@ -22,5 +22,14 @@ class HASS:
         response = post(self._api(api), headers=self.headers, json=data)
         return response.status_code
 
-    def toggle_light(self, entity: str) -> int:
+    def light_toggle(self, entity: str) -> int:
         return self._post(api="services/light/toggle", data=dict(entity_id=entity))
+
+    def light_on(self, entity: str) -> int:
+        return self._post(api="services/light/turn_on", data=dict(entity_id=entity))
+
+    def light_off(self, entity: str) -> int:
+        return self._post(api="services/light/turn_off", data=dict(entity_id=entity))
+
+    def noop(self) -> int:
+        return 200

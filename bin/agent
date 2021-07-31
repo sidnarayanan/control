@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+
+import control as C
+import sys
+from enum import Enum
+from control.audio import Listener
+from speech_recognition import Recognizer, AudioData
+from time import sleep
+import signal
+import signal
+
+
+def signal_handler(sig, frame):
+    print("Exiting in response to ctrl-c")
+    C.hass.light_off(C.global_config.control_indicator_entity)
+    sys.exit(0)
+
+
+class ListeningState(Enum):
+    passive = 0
+    active = 1
+
+
+class Agent:
+    def __init__(self):
+        self.state = ListeningState.passive
+
+    def __call__(self, rec: Recognizer, audio: AudioData):
+        if self.state == ListeningState.active:
+            return
+
+        kw = C.keywords.score_audio(audio)
+
+        if kw is None:
+            return
+
+        if kw == C.global_config.control_wakeword:
+            # hearing the wakeword always resets the state
+            self.state = ListeningState.active
+            C.hass.light_on(C.global_config.control_indicator_entity)
+            with C.Listener() as active_listener:
+                audio = active_listener.listen()
+                kw = C.keywords.score_audio(audio)
+                if kw is None:
+                    print(f"Could not recognize keyword.")
+
+                action = C.global_config.actions.get(kw)
+
+                if action is None:
+                    print(f'Action "{kw}" is not known')
+                else:
+                    action = action.copy()
+                    action_name = action.pop("action")
+                    getattr(C.hass, action_name)(**action)
+
+            C.hass.light_off(C.global_config.control_indicator_entity)
+            self.state = ListeningState.passive
+
+
+def main():
+    agent = Agent()
+    signal.signal(signal.SIGINT, signal_handler)
+
+    try:
+        C.listener.listen_in_background(agent)
+        while True:
+            sleep(3600)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

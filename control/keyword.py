@@ -69,7 +69,7 @@ class Keyword:
         for ref in self.mfccs:
             dists.append(dtw(query, ref).distance)
 
-        return np.mean(dists)
+        return np.min(dists)
 
 
 class KeywordSet(dict):

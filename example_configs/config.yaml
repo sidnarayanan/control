@@ -1,0 +1,4 @@
+listen_timeout: 10 
+
+control_indicator_entity: light.control_indicator_level_on_off
+control_wakeword: electron
