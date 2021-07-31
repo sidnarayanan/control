@@ -74,6 +74,7 @@ class Keyword:
 
 class KeywordSet(dict):
     def __init__(self, config: Config = None):
+        config = resolve_config(config)
         if config is not None:
             self.load(config)
         self.config = resolve_config(config)
@@ -91,11 +92,13 @@ class KeywordSet(dict):
     def add(self, keyword: Keyword):
         self[keyword.name] = keyword
 
-    def save(self, config: Config):
+    def save(self, config: Config = None):
+        config = resolve_config(config)
         with open(f"{config.config_path}/keywords.pkl", "wb") as fpkl:
             pickle.dump(dict(self), fpkl)
 
-    def load(self, config: Config):
+    def load(self, config: Config = None):
+        config = resolve_config(config)
         try:
             with open(f"{config.config_path}/keywords.pkl", "rb") as fpkl:
                 self.update(pickle.load(fpkl))

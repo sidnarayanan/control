@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 
 
-import speech_recognition as sr
-import control as C
-from argparse import ArgumentParser
 import sys
+from argparse import ArgumentParser
+
+import control as C
 
 
 def main():
-    config = C.get_config()
-    kws = C.KeywordSet(config=config)
-
     parser = ArgumentParser("Add a new keyword")
     parser.add_argument("--keyword", "-k", help="Name of this keyword")
     parser.add_argument(
@@ -21,26 +18,24 @@ def main():
     )
     args = parser.parse_args()
 
+    kws = C.keywords
+
     if args.keyword in kws and not args.overwrite:
         print(f"{args.keyword} is already calibrated. Pass --overwrite")
         return 1
 
-    r = sr.Recognizer()
-    m = sr.Microphone()
     kw = C.Keyword(args.keyword)
 
-    with m as source:
-        r.adjust_for_ambient_noise(source)
-
+    with C.listener as l:
         print(f"Recording {args.n_samples} samples", flush=True)
         for i in range(args.n_samples):
             print(f"Recording sample {i}...", end="", flush=True)
-            audio = r.listen(source)
+            audio = l.listen()
             print("done.", flush=True)
             kw.add_calibration_sample(audio)
 
     kws.add(kw)
-    kws.save(config)
+    kws.save()
 
     return 0
 
